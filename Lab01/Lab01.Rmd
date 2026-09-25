@@ -1,0 +1,98 @@
+---
+title: "Lab01"
+author: "Ray Kuo"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+---
+
+## 1. 讀取資料
+
+```{r}
+library(haven)
+pisa <- read_sav("PISA_tawian2022_trimmed_lab.sav")
+head(pisa) 
+summary(pisa) 
+```
+
+## 確認變項
+
+確認各變項數值的意義，其中PV1MATH為分數，不需確認
+
+```{r}
+names(pisa)                 
+print_labels(pisa$Gender)   
+print_labels(pisa$WORKPAY)
+```
+
+## 2.以WORKPAY為變項作圖
+
+資料為離散型，因此使用長條圖作圖。
+
+```{r}
+library(ggplot2)
+library(dplyr)
+workpay_summary <- pisa %>%
+  count(WORKPAY) %>%
+  mutate(percent = n / sum(n) * 100)
+
+workpay_summary # compute the percent per category
+
+ggplot(workpay_summary,
+       aes(x = factor(WORKPAY), y = n)) +
+  geom_col() +
+  scale_x_discrete(
+    labels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+")
+  ) +
+  labs(
+    x = "How many times of working for pay per week",
+    y = "Frequancy",
+  ) +
+  theme_classic()
+```
+
+## 3.以Gender為變項作圖
+
+資料為名義變項並且為離散型，由於只有兩種分類，因此選用圓餅圖，視覺效果最佳。
+
+```{r}
+library(dplyr)
+gender_summary <- pisa %>%
+  count(Gender) %>%
+  mutate(percent = n / sum(n) * 100)
+
+gender_summary # compute the percent per category
+
+library(ggplot2)
+ggplot(gender_summary,
+       aes(x = "", y = percent, fill = factor(Gender))) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  geom_text(
+    aes(label = paste0(round(percent, 1), "%")),
+    position = position_stack(vjust = 0.5)
+  ) +
+  scale_fill_discrete(
+    labels = c("Female", "Male")
+  ) +
+  labs(
+    fill = "Gender"
+  ) +
+  theme_void()
+```
+
+## 4.以PV1MATH為變項作圖
+
+資料為連續型，因此使用直方圖作圖。
+
+```{r}
+library(ggplot2)
+ggplot(pisa, aes(x = PV1MATH)) +
+  geom_histogram(binwidth = 50, color = "black", fill = "lightblue") +
+  labs(
+    x = "Math score",
+    y = "Frequency",
+    title = "Distribution of Math Scores"
+  ) +
+  theme_classic()
+```
