@@ -1,0 +1,75 @@
+---
+title: "Lab02"
+author: "Ray Kuo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## 1. 讀取資料
+
+把資料存儲成純數值的型態方便使用
+
+```{r}
+library(haven)
+pisa <- read_sav("PISA_tawian2022_trimmed_lab.sav")
+escs <- as.numeric(pisa$ESCS)
+```
+
+## 描述統計
+
+提取有關ESCS的資訊，其中psych::describe()的輸出比較完整
+
+```{r}
+library(psych)
+round(summary(escs), 2)
+describe(escs)
+```
+
+## 2. 均值
+
+所有數值加總後除以個數，代表資料的中心位置。
+
+```{r}
+round(mean(escs), 2)
+```
+
+## 3. 標準差
+
+各數值與均值的平均差距，數值越大代表資料越分散。
+
+```{r}
+round(sd(escs), 2)
+```
+
+## 4. 最大值及最小值
+
+資料中最大與最小的數值。
+
+```{r}
+round(max(escs), 2)
+round(min(escs), 2)
+```
+
+## 5. 全距
+
+最大值減最小值，代表資料涵蓋的範圍。
+
+```{r}
+round(max(escs) - min(escs), 2)
+```
+
+## 6. 中位數
+
+由小到大排序後位於正中間的數值，不受極端值影響。
+
+```{r}
+round(median(escs), 2)
+```
+
+## 7. IQR
+
+第三四分位數減第一四分位數，代表中間 50% 資料的範圍。
+
+```{r}
+round(IQR(escs), 2)
+```
