@@ -1,0 +1,74 @@
+---
+title: "Lab03"
+author: "Ray Kuo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## 1. 讀取資料
+
+讀入 PISA 資料並把 ESCS 存成純數值。
+
+```{r, message=FALSE}
+library(haven)  # 讀取 SPSS 檔
+library(psych)  # describe() 描述統計
+pisa <- read_sav("PISA_tawian2022_trimmed_lab.sav")  # 讀入 PISA 資料
+escs <- as.numeric(pisa$ESCS)  # 去掉 SPSS 標籤，存成純數值
+
+describe(escs)  # 原始 ESCS 的描述統計
+```
+
+## 2. 計算 z 分數
+
+方法一：用公式 (x - 平均數) / 標準差
+
+方法二：用 scale()，center = TRUE 是減平均數，scale = TRUE 是除以標準差；結果是只有一欄的矩陣
+
+由於資料較長，故用 head() 取前幾項，並四捨五入到小數第二位
+
+```{r}
+# 方法一：照公式計算
+round(head((escs - mean(escs)) / sd(escs)), 2)
+
+# 方法二：scale()，結果為矩陣
+round(head(scale(escs, center = TRUE, scale = TRUE)), 2)
+```
+
+## 3. 把 z 分數存成新變項
+
+scale() 的結果是矩陣，後面加 [,1] 取出向量，再存進 pisa 資料中成為新變項 escs.z，並用 head() 和原始 ESCS 對照，確認新變項有加進去
+
+```{r}
+pisa$escs.z <- scale(escs, center = TRUE, scale = TRUE)[,1]  # 新增變項 escs.z
+
+round(head(data.frame(ESCS = escs, escs.z = pisa$escs.z)), 2)  # 對照原始分數與 z 分數
+```
+
+## 4. z 分數的描述統計
+
+z 分數的均值為 0，標準差為 1
+
+```{r}
+describe(pisa$escs.z)  # z 分數的描述統計
+
+format(round(mean(pisa$escs.z), 2), nsmall = 2)  # 均值，取到小數第二位
+
+format(round(sd(pisa$escs.z), 2), nsmall = 2)  # 標準差，取到小數第二位
+```
+
+## 5. z 分數直方圖
+
+由於 z 分數的標準差為 1，故方法二以 0.5 為寬度，方便觀察
+
+```{r, message=FALSE}
+# 方法一：hist()
+hist(pisa$escs.z, main = "Histogram of ESCS z-scores", xlab = "ESCS z-score")
+
+# 方法二：ggplot2 的 geom_histogram()
+library(ggplot2)
+
+p <- ggplot(pisa, aes(x = escs.z)) +
+  geom_histogram(binwidth = 0.5, boundary = 0) +  # 組距 0.5，以 0 為組界
+  labs(title = "Histogram of ESCS z-scores", x = "ESCS z-score", y = "Count")
+p
+```
