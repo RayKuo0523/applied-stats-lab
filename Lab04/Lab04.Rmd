@@ -1,0 +1,63 @@
+---
+title: "Lab04"
+author: "Ray Kuo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## 1. 讀取資料
+
+讀入 PISA 資料，並載入畫散佈圖所需的套件。
+
+```{r, message=FALSE}
+library(haven)   # 讀取 SPSS 檔
+library(ggplot2)
+library(ggpubr)  # ggscatter() 散佈圖
+pisa <- read_sav("PISA_tawian2022_trimmed_lab.sav")
+```
+
+## 2. 第一組變項：ESCS 與 PV1MATH
+
+### 散佈圖
+
+以 ESCS 為 x 軸、PV1MATH 為 y 軸，加上回歸線、95% 信賴區間與 Pearson 相關係數。
+
+```{r, message=FALSE}
+ggscatter(pisa, x = "ESCS", y = "PV1MATH",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Index of economic, social and cultural status",
+          ylab = "Plausible Value 1 in Mathematics")
+```
+
+### Pearson 相關係數
+
+cor.test() 提供 r、t 值、p 值與信賴區間；cor() 只算 r，四捨五入到小數第二位。
+
+```{r}
+cor.test(pisa$ESCS, pisa$PV1MATH, method = "pearson")
+
+round(cor(pisa$ESCS, pisa$PV1MATH, method = "pearson"), 2)
+```
+
+## 3. 第二組變項：AGE 與 ESCS
+
+### 散佈圖
+
+以 AGE 為 x 軸、ESCS 為 y 軸，設定同上。
+
+```{r, message=FALSE}
+ggscatter(pisa, x = "AGE", y = "ESCS",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Students' age",
+          ylab = "Index of economic, social and cultural status")
+```
+
+### Pearson 相關係數
+
+```{r}
+cor.test(pisa$AGE, pisa$ESCS, method = "pearson")
+
+round(cor(pisa$AGE, pisa$ESCS, method = "pearson"), 2)
+```
