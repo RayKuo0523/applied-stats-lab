@@ -1,0 +1,64 @@
+---
+title: "Lab05"
+author: "Ray Kuo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## 1. 讀取資料
+
+讀入 PISA 資料。
+
+```{r, message=FALSE}
+library(haven)  # 讀取 SPSS 檔
+library(psych)  # describe() 描述統計
+
+pisa <- read_sav("PISA_tawian2022_trimmed_lab.sav")  # 讀入 PISA 資料
+```
+
+## 2. 描述統計
+
+先確認 PV1MATH 的樣本數、遺漏值、平均數與標準差，這些就是 t 統計量公式裡的 n、x̄ 和 s。
+
+```{r}
+sum(is.na(pisa$PV1MATH))  # 遺漏值個數
+
+describe(pisa$PV1MATH)  # 樣本數、平均數、標準差、偏態、峰度
+
+round(mean(pisa$PV1MATH), 2)  # 平均數
+
+round(sd(pisa$PV1MATH), 2)  # 標準差
+
+round(sd(pisa$PV1MATH) / sqrt(length(pisa$PV1MATH)), 2)  # 標準誤 SE = s / √n
+```
+
+## 3. 單一樣本 t 檢定
+
+- H0: μ = 440（台灣學生的數學平均分數等於 PISA 全球均值 440 分）
+- H1: μ ≠ 440（台灣學生的數學平均分數不等於 440 分）
+- α = .05
+
+母體標準差 σ 未知，所以用樣本標準差 s 估計，進行單一樣本 t 檢定。
+
+```{r}
+# 雙尾檢定，mu 設為虛無假設的母體平均數 440
+t.test(pisa$PV1MATH, alternative = "two.sided", mu = 440)
+```
+
+## 4. 整理結果
+
+把 t.test() 的結果存起來，取出 t 值、自由度、p 值、平均數差異與 95% 信賴區間，四捨五入到小數第二位。
+
+```{r}
+result <- t.test(pisa$PV1MATH, alternative = "two.sided", mu = 440)  # 存下檢定結果
+
+round(result$statistic, 2)  # t 值
+
+result$parameter  # 自由度 df = n - 1
+
+result$p.value  # p 值
+
+round(result$estimate - 440, 2)  # 樣本平均數與 440 的差距
+
+round(result$conf.int, 2)  # 母體平均數的 95% 信賴區間
+```
